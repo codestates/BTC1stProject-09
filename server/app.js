@@ -6,8 +6,9 @@ const port = 5000;
 
 
 app.get('/', (req, res) => {
-    res.send('test success')
+    res.send('test success!')
 })
+
 
 app.listen(port || port, () => {
     console.log(port, '구동중');
