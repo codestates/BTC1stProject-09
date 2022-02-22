@@ -11,5 +11,5 @@ app.get('/', (req, res) => {
 
 
 app.listen(port || port, () => {
-    console.log(port, '구동중');
+    console.log(port, '구동중!');
 })
