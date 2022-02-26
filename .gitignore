@@ -3,3 +3,4 @@ node_modules/
 public
 .dfx
 .vscode
+package-lock.json

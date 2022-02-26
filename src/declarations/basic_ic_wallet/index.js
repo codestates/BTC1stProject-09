@@ -1,16 +1,16 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
 
 // Imports and re-exports candid interface
-import { idlFactory } from './phone_book.did.js';
-export { idlFactory } from './phone_book.did.js';
+import { idlFactory } from './basic_ic_wallet.did.js';
+export { idlFactory } from './basic_ic_wallet.did.js';
 // CANISTER_ID is replaced by webpack based on node environment
-export const canisterId = process.env.PHONE_BOOK_CANISTER_ID;
+export const canisterId = process.env.BASIC_IC_WALLET_CANISTER_ID;
 
 /**
  * 
  * @param {string | import("@dfinity/principal").Principal} canisterId Canister ID of Agent
  * @param {{agentOptions?: import("@dfinity/agent").HttpAgentOptions; actorOptions?: import("@dfinity/agent").ActorConfig}} [options]
- * @return {import("@dfinity/agent").ActorSubclass<import("./phone_book.did.js")._SERVICE>}
+ * @return {import("@dfinity/agent").ActorSubclass<import("./basic_ic_wallet.did.js")._SERVICE>}
  */
  export const createActor = (canisterId, options) => {
   const agent = new HttpAgent({ ...options?.agentOptions });
@@ -32,7 +32,7 @@ export const canisterId = process.env.PHONE_BOOK_CANISTER_ID;
 };
   
 /**
- * A ready-to-use agent for the phone_book canister
- * @type {import("@dfinity/agent").ActorSubclass<import("./phone_book.did.js")._SERVICE>}
+ * A ready-to-use agent for the basic_ic_wallet canister
+ * @type {import("@dfinity/agent").ActorSubclass<import("./basic_ic_wallet.did.js")._SERVICE>}
  */
- export const phone_book = createActor(canisterId);
+ export const basic_ic_wallet = createActor(canisterId);

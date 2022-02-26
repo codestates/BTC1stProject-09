@@ -1,0 +1,12 @@
+{
+  "canisters": {
+    "basic_ic_wallet": {
+      "main": "src/backend/basic_ic_wallet/Main.mo"
+    },
+    "www": {
+      "dependencies": ["basic_ic_wallet"],
+      "type": "assets",
+      "source": ["public"]
+    }
+  }
+}
