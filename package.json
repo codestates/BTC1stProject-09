@@ -1,0 +1,43 @@
+{
+  "name": "gatsby-dfx",
+  "version": "1.0.0",
+  "description": "gatsby-dfx",
+  "author": "Kyle Peacock",
+  "keywords": [
+    "Internet Computer",
+    "Motoko",
+    "JavaScript",
+    "Canister",
+    "gatsby"
+  ],
+  "scripts": {
+    "develop": "gatsby develop --port 8080",
+    "start": "gatsby develop --port 8080",
+    "prestart": "npm run copy:types",
+    "build": "gatsby build",
+    "prebuild": "npm run copy:types",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean",
+    "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --delete src/declarations"
+  },
+  "dependencies": {
+    "@dfinity/agent": "^0.10.0-beta.1",
+    "@dfinity/candid": "^0.10.0-beta.1",
+    "@dfinity/principal": "^0.10.0-beta.1",
+    "babel-plugin-styled-components": "^1.12.0",
+    "gatsby": "^3.1.2",
+    "gatsby-plugin-alias-imports": "^1.0.5",
+    "gatsby-plugin-styled-components": "^4.1.0",
+    "isomorphic-fetch": "^3.0.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "styled-components": "^5.2.1",
+    "vcf": "^2.1.0"
+  },
+  "browserslist": [
+    "last 2 chrome version",
+    "last 2 firefox version",
+    "last 2 safari version",
+    "last 2 edge version"
+  ]
+}
