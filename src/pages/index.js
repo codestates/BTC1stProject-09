@@ -1,6 +1,10 @@
 import * as React from "react";
 import styled from "styled-components";
 import vCard from "vcf";
+import { AuthClient } from '@dfinity/auth-client';
+
+// For NNS
+const IC_NNS_DOMAIN = "https://identity.ic0.app/";
 
 // styles
 const Main = styled.main`
@@ -54,15 +58,15 @@ const ContactCard = ({ card }) => {
         {Object.entries(card.data).map(([key, value]) => {
           const [_field, _data] = value;
           console.log(value);
-          if (value._field === "photo") {
+          if (_field === "photo") {
             return (
-              <React.Fragment key={value._field}>
-                <dt>{value._field}</dt>
+              <React.Fragment key={_field}>
+                <dt>{_field}</dt>
                 <dd>
                   <ProfilePicture>
                     <img
                       style={{ maxWidth: "75px" }}
-                      src={atob(value._data)}
+                      src={atob(_data)}
                       alt="profile"
                     />
                   </ProfilePicture>
@@ -72,8 +76,8 @@ const ContactCard = ({ card }) => {
           } else {
             return (
               <>
-                <dt>{value._field}</dt>
-                <dd>{value._data}</dd>
+                <dt>{_field}</dt>
+                <dd>{_data}</dd>
               </>
             );
           }
@@ -96,16 +100,28 @@ const IndexPage = () => {
   const [image, setImage] = React.useState("");
   const [card, setCard] = React.useState(null);
   const [actor, setActor] = React.useState(null);
+  const [/*identifier*/, setIdentifier] = React.useState(null);
 
-  // @lkim | Initialize the app here
-  React.useEffect(() => {
-    // Redirect to NNS authentication for brand new users
-    // some code using auth-agent
+  // Initialize the app here
+  React.useEffect(async () => {
+    try {
+      // Redirect to NNS authentication for brand new users
+      const authClient = await AuthClient.create();
+      await authClient.login({
+        identityProvider: IC_NNS_DOMAIN,
+        onSuccess: async () => {
+          const id = await authClient.getIdentity();
+          setIdentifier(id);
+          console.info("Identifier is successfully set:", id);
+        }
+      })
 
-    // Set the Actor for communicating with IC network
-    import("../declarations/basic_ic_wallet").then((module) => {
+      // Set the Actor for communicating with IC network
+      const module = await import('../declarations/basic_ic_wallet');
       setActor(module.basic_ic_wallet);
-    });
+    } catch (e) {
+      console.error("Error found while initializing basic_ic_wallet:", e);
+    }
   }, []);
 
   function handleSubmit(e) {
