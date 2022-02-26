@@ -97,7 +97,12 @@ const IndexPage = () => {
   const [card, setCard] = React.useState(null);
   const [actor, setActor] = React.useState(null);
 
+  // @lkim | Initialize the app here
   React.useEffect(() => {
+    // Redirect to NNS authentication for brand new users
+    // some code using auth-agent
+
+    // Set the Actor for communicating with IC network
     import("../declarations/basic_ic_wallet").then((module) => {
       setActor(module.basic_ic_wallet);
     });
