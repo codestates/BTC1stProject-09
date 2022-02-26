@@ -1,6 +1,7 @@
-![header](https://capsule-render.vercel.app/api?type=slice&color=gradient&height=160&section=header&text=TEAM DRIVE&fontAlign=50&fontAlignY=70&fontSize=90&fontColor=#eee)
+![image](https://user-images.githubusercontent.com/10539949/155831893-dcb6492b-3d61-4a40-b08a-442474088cb3.png)
 
-# Wallet and Tx Explorer on Internet Computer Network
+# TEAM DRIVE
+**Wallet and Tx Explorer on Internet Computer Network**
 
 The project was bootstrapped using `npm init gatsby`, with the following modifications:
 
@@ -25,6 +26,8 @@ run `dfx deploy basic_ic_wallet` to deploy the backend canister
 run `npm start` to spin up a development server
 
 Finally, hit `http://localhost:8080/`
+
+![image](https://user-images.githubusercontent.com/10539949/155831743-1bf51905-348a-4f07-aaab-f3b16092ed3c.png)
 
 ## Publishing
 
