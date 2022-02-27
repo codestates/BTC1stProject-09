@@ -4,3 +4,4 @@ public/
 .dfx
 .vscode
 package-lock.json
+src/delcarations/
