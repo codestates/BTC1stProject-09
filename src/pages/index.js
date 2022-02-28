@@ -1,9 +1,17 @@
 import * as React from "react";
 import styled from "styled-components";
 import vCard from "vcf";
-import { AuthClient } from '@dfinity/auth-client';
+import { AuthClient } from "@dfinity/auth-client";
+import {
+  key_new,
+  key_to_pub_key,
+  address_to_hex,
+} from "@dfinity/rosetta-client";
+import utils from "../utils";
+import { Principal } from "@dfinity/principal";
 
 // For NNS
+const bip39 = require("bip39");
 const IC_NNS_DOMAIN = "https://identity.ic0.app/";
 
 // styles
@@ -100,31 +108,74 @@ const IndexPage = () => {
   const [image, setImage] = React.useState("");
   const [card, setCard] = React.useState(null);
   const [actor, setActor] = React.useState(null);
-  const [/*identifier*/, setIdentifier] = React.useState(null);
+  const [identifier, setIdentifier] = React.useState(null);
+  const [mnemonic] = React.useState(bip39.generateMnemonic());
+  const [address, setAddress] = React.useState("abc");
 
   // Initialize the app here
   React.useEffect(async () => {
+    let authClient = await AuthClient.create();
     try {
-      // Redirect to NNS authentication for brand new users
-      const authClient = await AuthClient.create();
-      await authClient.login({
-        identityProvider: IC_NNS_DOMAIN,
-        onSuccess: async () => {
-          const id = await authClient.getIdentity();
-          setIdentifier(id);
-          console.info("Identifier is successfully set:", id);
-        }
-      })
+      if (await authClient.isAuthenticated()) {
+        console.info("This user is already NNS authenticated");
+        handleAuthenticated(authClient);
+      } else {
+        // Redirect to NNS authentication for brand new users
+        await authClient.login({
+          identityProvider: IC_NNS_DOMAIN,
+          onSuccess: async () => {
+            const id = await authClient.getIdentity().getPublicKey();
+            setIdentifier(id);
 
-      // Set the Actor for communicating with IC network
-      const module = await import('../declarations/basic_ic_wallet');
-      setActor(module.basic_ic_wallet);
+            console.info("Identifier is successfully set:", id);
+          },
+        });
+      }
     } catch (e) {
       console.error("Error found while initializing basic_ic_wallet:", e);
+    } finally {
+      console.log("finally hook");
+      // Set the Actor for communicating with IC network
+      const module = await import("../declarations/basic_ic_wallet");
+      window.customModule = module;
+      const id = await authClient.getIdentity();
+      debugger;
+      const text = await window.customModule.basic_ic_wallet.p2a(
+        id.getPrincipal()
+      );
+
+      setActor(module.basic_ic_wallet);
+
+      // const id = await authClient.getIdentity();
+      // const principal = id.getPrincipal();
+      // console.log(principal);
+      // const address = await actor?.accountIdentifier(principal);
+      // console.log(address);
+      // setAddress(address);
+      // const principal = authClient.getIdentity((id) => {
+      //   id.getPrincipal((principal) => {
+      //     actor?.p2a(principal).then((account) => {
+      //       console.log("Finally, your address is", account);
+      //       setAddress(account);
+      //     });
+      //   });
+      // });
     }
   }, []);
 
+  async function handleAuthenticated(authClient) {
+    const id = await authClient.getIdentity();
+    // debugger;
+    console.log("id in handleAuthenticated: ", id);
+    setIdentifier(id);
+    window.identity = id;
+    return;
+  }
+
   function handleSubmit(e) {
+    // setAddress(identifier);
+    // console.info("User's whoami:", actor?.whoami());
+    // alert(actor?.whoami());
     e.preventDefault();
 
     const card = new vCard();
@@ -155,6 +206,15 @@ const IndexPage = () => {
         input.value = "";
       });
       setImage("");
+    });
+
+    console.log("After submit: id", identifier);
+    identifier.getPrincipal((principal) => {
+      console.log("After submit: principal", principal);
+      actor?.accountIdentifier(principal).then((account) => {
+        console.log("Finally, your address is", account);
+        setAddress(account);
+      });
     });
 
     return false;
@@ -207,6 +267,9 @@ const IndexPage = () => {
       </section>
       {/* Card Display */}
       <ContactCard card={card} />
+
+      <h1>Here is your generated ICP token address: </h1>
+      <h2>{address}</h2>
 
       <form onSubmit={handleSubmit}>
         <h2>Add a Contact</h2>

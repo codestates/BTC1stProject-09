@@ -1,0 +1,6 @@
+service : {
+  get: (text) -> (opt text) query;
+  p2a: (principal) -> (text);
+  set: (text, text) -> (opt text);
+  whoami: () -> (principal);
+}
