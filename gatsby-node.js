@@ -35,10 +35,20 @@ initCanisterIds();
 
 exports.onCreateWebpackConfig = ({ stage, actions }) => {
   actions.setWebpackConfig({
+    resolve: {
+      modules: [path.resolve(__dirname, "src"), "node_modules"],
+      fallback: {
+        stream: require.resolve("stream-browserify"),
+        crypto: require.resolve("crypto-browserify"),
+      },
+    },
     plugins: [
       new webpack.EnvironmentPlugin({
         NODE_ENV: "development",
         BASIC_IC_WALLET_CANISTER_ID: canisters["basic_ic_wallet"],
+      }),
+      new webpack.ProvidePlugin({
+        Buffer: [require.resolve("buffer/"), "Buffer"],
       }),
     ],
   });
