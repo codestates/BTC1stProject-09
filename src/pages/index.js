@@ -2,16 +2,10 @@ import * as React from "react";
 import styled from "styled-components";
 import vCard from "vcf";
 import { AuthClient } from "@dfinity/auth-client";
-import {
-  key_new,
-  key_to_pub_key,
-  address_to_hex,
-} from "@dfinity/rosetta-client";
-import utils from "../utils";
-import { Principal } from "@dfinity/principal";
+import RosettaApi, { RosettaError } from "../utils/rosettaApi";
+import BigNumber from "bignumber.js";
 
 // For NNS
-const bip39 = require("bip39");
 const IC_NNS_DOMAIN = "https://identity.ic0.app/";
 
 // styles
@@ -19,7 +13,6 @@ const Main = styled.main`
   color: "#232129";
   padding: 96;
   font-family: "-apple-system, Roboto, sans-serif, serif";
-  width: fit-content;
 
   fieldset,
   label {
@@ -28,8 +21,20 @@ const Main = styled.main`
   }
   input {
     min-width: 280px;
-    width: fit-content;
   }
+`;
+
+const IcWallet = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 330px;
+  font: caption;
+`;
+
+const Title = styled.h1`
+  font-size: 20px;
 `;
 
 const ProfilePicture = styled.picture`
@@ -45,7 +50,6 @@ const DataList = styled.dl`
   grid-template-columns: auto auto;
   dt,
   dd {
-    /* width: fit-content; */
     display: inline-flex;
     border: 1px solid black;
     padding: 4px;
@@ -109,8 +113,8 @@ const IndexPage = () => {
   const [card, setCard] = React.useState(null);
   const [actor, setActor] = React.useState(null);
   const [identifier, setIdentifier] = React.useState(null);
-  const [mnemonic] = React.useState(bip39.generateMnemonic());
-  const [address, setAddress] = React.useState("abc");
+  const [address, setAddress] = React.useState("Loading.....");
+  const [accountBalance, setAccountBalance] = React.useState("Loading.....");
 
   // Initialize the app here
   React.useEffect(async () => {
@@ -139,33 +143,26 @@ const IndexPage = () => {
       const module = await import("../declarations/basic_ic_wallet");
       window.customModule = module;
       const id = await authClient.getIdentity();
-      debugger;
-      const text = await window.customModule.basic_ic_wallet.p2a(
+      const address = await window.customModule.basic_ic_wallet.p2a(
         id.getPrincipal()
       );
-
+      setAddress(address);
+      window.ic_address = address;
       setActor(module.basic_ic_wallet);
 
-      // const id = await authClient.getIdentity();
-      // const principal = id.getPrincipal();
-      // console.log(principal);
-      // const address = await actor?.accountIdentifier(principal);
-      // console.log(address);
-      // setAddress(address);
-      // const principal = authClient.getIdentity((id) => {
-      //   id.getPrincipal((principal) => {
-      //     actor?.p2a(principal).then((account) => {
-      //       console.log("Finally, your address is", account);
-      //       setAddress(account);
-      //     });
-      //   });
-      // });
+      const rosettaApi = new RosettaApi();
+      if (address) {
+        const accountBalance = await rosettaApi.getAccountBalance(address);
+        let targetBalance = new BigNumber(accountBalance).c[0] / 100000000;
+
+        setAccountBalance(targetBalance);
+        window.ic_account_balance = accountBalance;
+      }
     }
   }, []);
 
   async function handleAuthenticated(authClient) {
     const id = await authClient.getIdentity();
-    // debugger;
     console.log("id in handleAuthenticated: ", id);
     setIdentifier(id);
     window.identity = id;
@@ -173,9 +170,6 @@ const IndexPage = () => {
   }
 
   function handleSubmit(e) {
-    // setAddress(identifier);
-    // console.info("User's whoami:", actor?.whoami());
-    // alert(actor?.whoami());
     e.preventDefault();
 
     const card = new vCard();
@@ -214,6 +208,7 @@ const IndexPage = () => {
       actor?.accountIdentifier(principal).then((account) => {
         console.log("Finally, your address is", account);
         setAddress(account);
+        window.ic_address = address;
       });
     });
 
@@ -254,75 +249,18 @@ const IndexPage = () => {
 
   return (
     <Main>
-      <title>Contact Book</title>
-      <h1>Internet Computer Address Book</h1>
-      <section>
-        <h2>Look up a contact by email</h2>
-        <form onSubmit={getCard}>
-          <label htmlFor="emailsearch">
-            <input type="email" name="emailsearch" id="emailsearch" />
-          </label>
-          <button type="submit">Search</button>
-        </form>
-      </section>
-      {/* Card Display */}
-      <ContactCard card={card} />
+      <IcWallet>
+        <title>Simple IC Wallet</title>
+        <h1>Internet Computer Simple Wallet</h1>
+        {/* Card Display */}
+        <ContactCard card={card} />
 
-      <h1>Here is your generated ICP token address: </h1>
-      <h2>{address}</h2>
-
-      <form onSubmit={handleSubmit}>
-        <h2>Add a Contact</h2>
-        <fieldset>
-          <h3>Personal Information</h3>
-          <label htmlFor="n">
-            Full Name
-            <input type="text" name="n" autoComplete="name" />
-          </label>
-          <label htmlFor="org">
-            Organziation
-            <input type="text" name="org" autoComplete="organization" />
-          </label>
-          <label htmlFor="title">
-            Title
-            <input type="text" name="title" autoComplete="organization-title" />
-          </label>
-        </fieldset>
-        <fieldset>
-          <h3>Profile photo</h3>
-          <label htmlFor="photo">
-            Upload an image
-            <input
-              type="file"
-              id="img"
-              name="photo"
-              accept="image/*"
-              onChange={handleUpload}
-            />
-          </label>
-          {image ? (
-            <ProfilePicture>
-              <img src={image} alt="user-uploaded profile image" />
-            </ProfilePicture>
-          ) : null}
-        </fieldset>
-        <fieldset>
-          <h3>Contact</h3>
-          <label htmlFor="tel">
-            Phone number
-            <input type="text" name="tel" />
-          </label>
-          <label htmlFor="adr">
-            Address
-            <input type="text" name="adr" autoComplete="on" />
-          </label>
-          <label htmlFor="email">
-            Email
-            <input required type="email" name="email" autoComplete="email" />
-          </label>
-        </fieldset>
-        <button type="submit">Submit Contact</button>
-      </form>
+        <Title>Here is your generated ICP token address: </Title>
+        <span>{address}</span>
+        <br></br>
+        <Title>Account Balance: </Title>
+        <span>{accountBalance} ICP</span>
+      </IcWallet>
     </Main>
   );
 };
