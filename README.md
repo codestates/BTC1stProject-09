@@ -27,7 +27,10 @@ run `npm start` to spin up a development server
 
 Finally, hit `http://localhost:8080/`
 
-![image](https://user-images.githubusercontent.com/10539949/155831743-1bf51905-348a-4f07-aaab-f3b16092ed3c.png)
+![image](https://user-images.githubusercontent.com/10539949/156435449-5d45bfcd-82f9-485d-a59a-df137e969995.png)
+
+**Production Demo**
+gpjtt-taaaa-aaaai-qhmxa-cai.ic0.app/
 
 ## Publishing
 
